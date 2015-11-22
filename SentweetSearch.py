@@ -1,7 +1,7 @@
-
-
 print "Booting up SentweetSearch..."
 
+import sys
+sys.path.insert(0,"twitter")
 import twitter
 #from collections import Counter
 #from prettytable import PrettyTable
@@ -14,7 +14,7 @@ import nltk
 
 import matplotlib.pyplot as plt
 import scipy.stats as stats
-import seaborn as sns
+#import seaborn as sns
 
 from pylab import *
 
