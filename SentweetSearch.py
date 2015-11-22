@@ -21,8 +21,8 @@ from pylab import *
 
 #TRAINING STARTS HERE
 
-posCorpus = open("TwitterAppCorpus/finalPositiveCorpus.txt", "r")
-negCorpus = open("TwitterAppCorpus/finalNegativeCorpus.txt", "r")
+posCorpus = open("finalPositiveCorpus.txt", "r")
+negCorpus = open("finalNegativeCorpus.txt", "r")
 
 
 stopWords = dict([(word, True) for word in stopwords.words('english')]) #nltk's stopwords
