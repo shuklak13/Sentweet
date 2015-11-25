@@ -26,7 +26,7 @@ negCorpus = open("finalNegativeCorpus.txt", "r")
 
 
 stopWords = dict([(word, True) for word in stopwords.words('english')]) #nltk's stopwords
-stopWords2 = [".","!","?","rt","@","=","+","-","&amp;","…","follow","i'm","i'll"] #my own set of stopwords
+stopWords2 = [".","!","?","rt","@","=","+","-","&amp;","follow","i'm","i'll"] #my own set of stopwords
 
 #INSERT TRAINING HERE
 
@@ -150,7 +150,7 @@ while True: #repeat forever!
 
 
     #these are choices the user makes
-    variableChoice=0 #1 is location, 2 is day of week
+    variableChoice=0 #1 is location, 2 is day of week, 3 is time of day
     locationChoice=0 #1 is dfw, 2 is us, 3 is world
     dayChoice=-1 #0-6, this is the # of the day the user is searching
     dayOfWeek="" #Sun-Sat, this is the day the user is searching
@@ -286,7 +286,7 @@ while True: #repeat forever!
     
     while True:
         try:
-            num=int(raw_input("How many tweets do you want to search?\n"))
+            num=int(raw_input("How many tweets do you want to search for?\n"))
             break
         except ValueError:
             print "\nPlease input an integer number."
@@ -302,6 +302,7 @@ while True: #repeat forever!
         #this is my old (not necessarily outdated) code
         if locationChoice==1:
             print "Searching the Dallas Fort Worth Area..."
+            #search for 500 tweets (100 tweets, 5 times)
             for i in range(0,5):
                 search_results = twitter.api.search.tweets(q=q,lang="en",geocode=dalGeoCode,count=100,max_id=lastID)
                 unlistedTweets = unlistedTweets+search_results['statuses'][:100]
@@ -325,14 +326,14 @@ while True: #repeat forever!
                 search_resultsDFW = twitter.api.search.tweets(q=q,lang="en",geocode=dalGeoCode,count=100,max_id=lastID)
                 unlistedTweetsDFW = unlistedTweetsDFW+search_resultsDFW['statuses'][:100]
                 try:
-                    lastID = unlistedTweetsWorld[len(unlistedTweetsDFW)-1]["id"]
+                    lastID = unlistedTweetsDFW[len(unlistedTweetsDFW)-1]["id"]
                 except IndexError:
                     lastID=lastID
         for i in range(0,10):
                 search_resultsUS = twitter.api.search.tweets(q=q,lang="en",place=murica,count=100,max_id=lastID)
                 unlistedTweetsUS = unlistedTweetsUS+search_resultsUS['statuses'][:100]
                 try:
-                    lastID = unlistedTweetsWorld[len(unlistedTweetsUS)-1]["id"]
+                    lastID = unlistedTweetsUS[len(unlistedTweetsUS)-1]["id"]
                 except IndexError:
                     lastID=lastID
         for i in range(0,10):
