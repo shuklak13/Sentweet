@@ -136,9 +136,9 @@ while True: #repeat forever!
 
 	lastID=max
 	query = q
-	#get first 100 tweets
-	#twitter.api.search.tweets() returns a dictionary
+		#get first 100 tweets
 	listOfTweets = twitter.api.search.tweets(q = q,lang="en",count=100)["statuses"]
+		#get 1000 tweets
 
 	print "Okay... loading...\n"
 
