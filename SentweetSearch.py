@@ -18,6 +18,7 @@ from prettytable import PrettyTable
 #nltk stuff
 from nltk.corpus import stopwords
 from nltk.classify import NaiveBayesClassifier
+from nltk.stem.porter import PorterStemmer
 import nltk
 
 #pie graphs
@@ -30,6 +31,11 @@ def toUnicode(txt):
     return txt.decode("utf-8", errors='ignore')
 def utf8(txt):
     return txt.encode(sys.stdout.encoding, errors='ignore')
+
+stemmer = PorterStemmer()
+#stems the word and lowercases it
+def normalize(word):
+     return stemmer.stem(word.lower())
 
 #Code starts here
 
@@ -56,10 +62,19 @@ def word_features(fileName, mode):
     features = dict()
     for line in corpus:
         line = toUnicode(line)
-        features.update([(word.lower(), True) for word in line.split() 
-            if word not in stopWords and word not in stopWords2])
+        newFeatures = extractFeaturesFrom(line)
+        if newFeatures is not None:  #if line is NoneType, skip to next line
+            features.update(newFeatures)
     corpus.close()
     return features
+
+#iterate through every word in text, normalize it, and remove stopwords
+def extractFeaturesFrom(text):
+    if text is not None:
+        return dict([(normalize(word), True) for word in text.split() 
+                    if word not in stopWords and word not in stopWords2])
+    else:
+        return None
 
 #NLTK classifiers work on "featstructs", simple dictionaries
     #mapping a feature name to a feature value
@@ -157,12 +172,14 @@ while True: #repeat forever!
             print "(Tweeted from "+place+")."
         print "(Tweeted on "+time+")"
 
-        if classifier.classify(dict([(word, True) for word in tweet['text'].split()])) == 'neg':
-            print "(Detected a negative sentiment)"
-            numNeg=numNeg+1
-        if classifier.classify(dict([(word, True) for word in tweet['text'].split()])) == 'pos':
-            print "(Detected a positive sentiment)"
-            numPos=numPos+1
+        tweetFeatures = extractFeaturesFrom(tweet["text"])
+        if tweetFeatures is not None:
+            if classifier.classify(tweetFeatures) == "neg":
+                print "(Detected a negative sentiment)"
+                numNeg=numNeg+1
+            elif classifier.classify(tweetFeatures) == "pos":
+                print "(Detected a positive sentiment)"
+                numPos=numPos+1
         print
 
     print "In your search, found " + str(numPos) + " positive tweets, and " + str(numNeg) + " negative ones."
