@@ -1,6 +1,6 @@
 #To-do:
-#	Improve Sentiment Analysis
-#	Add back the location feature
+#   Improve Sentiment Analysis
+#   Add back the location feature
 
 print "Booting up SentweetSearch..."
 
@@ -15,8 +15,6 @@ from collections import Counter, defaultdict
 sys.path.insert(0,"prettytable")
 from prettytable import PrettyTable
 
-#import json
-
 #nltk stuff
 from nltk.corpus import stopwords
 from nltk.classify import NaiveBayesClassifier
@@ -25,58 +23,54 @@ import nltk
 #pie graphs
 import matplotlib.pyplot as py
 
-def mergesort(x):
-    result = []
-    if len(x) < 2:
-        return x
-    mid = int(len(x)/2)
-    y = mergesort(x[:mid])
-    z = mergesort(x[mid:])
-    while (len(y) > 0) or (len(z) > 0):
-        if len(y) > 0 and len(z) > 0:
-            if y[0]['retweet_count'] > z[0]['retweet_count']:
-                result.append(z[0])
-                z.pop(0)
-            else:
-                result.append(y[0])
-                y.pop(0)
-        elif len(z) > 0:
-            for i in z:
-                result.append(i)
-                z.pop(0)
-        else:
-            for i in y:
-                result.append(i)
-                y.pop(0)
-    return result
-
+#See this link for unicode explanation (Specifically, read about "Unicode Sandwich")
+    #http://nedbatchelder.com/text/unipain.html
+#used to convert byte strings to unicode (used for inner workings)
+def toUnicode(txt):
+    return txt.decode("utf-8", errors='ignore')
+def utf8(txt):
+    return txt.encode(sys.stdout.encoding, errors='ignore')
 
 #Code starts here
 
 #TRAINING BEGINS HERE
 stopWords = dict([(word, True) for word in stopwords.words('english')]) #nltk's stopwords
 stopWords2 = [".","!","?","rt","@","=","+","-","&amp;","follow","i'm","i'll"] #my own set of stopwords
+stopWords2 = [toUnicode(word) for word in stopWords2]
 
 print "Determining polarity of features..."
 
-def word_features(corpus):
+#return tuple (features, label)
+#for input into NLTK's Naive Bayes Classifier
+def feature_tuple(fileName, mode, label):
+    features = word_features(fileName, mode)
+    return (features, label)
+
+#add each word from the corpus into our dictionary
+    #if it's not a stopword
+#Note that normalization (word.lower()) is not needed 
+    #because the Stanford corpus is already lowercase
+#Other corpora might need to be normalized, however
+def word_features(fileName, mode):
+    corpus = open(fileName, mode)
     features = dict()
-    x=0
     for line in corpus:
-        x=x+1
-        features.update([(word, True) for word in line.split() if word not in stopWords and word not in stopWords2])#features minus stopwords
-	return features
+        line = toUnicode(line)
+        features.update([(word.lower(), True) for word in line.split() 
+            if word not in stopWords and word not in stopWords2])
+    corpus.close()
+    return features
 
-posCorpus = open("finalPositiveCorpus.txt", "r")
-negCorpus = open("finalNegativeCorpus.txt", "r")
+#NLTK classifiers work on "featstructs", simple dictionaries
+    #mapping a feature name to a feature value
+    #We use booleans to indicate that the set (a tweet) does(n't) contain a keyword
+    #For more information: http://www.nltk.org/howto/featstruct.html
 
-negfeats = (word_features(negCorpus), 'neg')
-posfeats = (word_features(posCorpus), 'pos')
-
-posCorpus.close()
-negCorpus.close()
-
-print "Establishing training set..."
+#A tuple (dict, label)
+    #Where dict is a dictionary of (word, boolean) key-val pairs
+    #label indicates positive or negative
+posfeats = feature_tuple("finalPositiveCorpus.txt", "r", "pos")
+negfeats = feature_tuple("finalNegativeCorpus.txt", "r", "neg")
 
 trainfeats=[negfeats,posfeats]
 
@@ -99,133 +93,134 @@ world=1
 murica=23424977
 
 while True: #repeat forever!
-	q="trends?"
-	while q=="trends?":
-		q=raw_input("What do you want to search on Twitter? (Type \"trends?\" for popular trends) \n")
+    q="trends?"
+    while q=="trends?":
+        q=raw_input("What do you want to search on Twitter? (Type \"trends?\" for popular trends) \n")
         
-		#if the user requests to see trends
-		if q=="trends?":
-			print "Worldwide trends:"
-			world_trends = twitter.api.trends.place(_id=world)
-			try:			#retrieve the top 5 trends
-				world_trends_list=[world_trends[0]["trends"][z]["name"]
-					   for z in range(0, 5)]
-			except IndexError:	#if there are fewer than 5 trends, just take all the trends
-			    world_trends_list=[world_trends[0]["trends"][z]["name"]
-						   for z in range(0, len(world_trends[0]["trends"]))]
-			for z in range(0,len(world_trends_list)):
-				try:
-					print world_trends_list[z]
-				except UnicodeEncodeError:
-					pass
+        #if the user requests to see trends
+        if q=="trends?":
+            print "Worldwide trends:"
+            world_trends = twitter.api.trends.place(_id=world)
+            try:            #retrieve the top 5 trends
+                world_trends_list=[world_trends[0]["trends"][z]["name"]
+                       for z in range(0, 5)]
+            except IndexError:  #if there are fewer than 5 trends, just take all the trends
+                world_trends_list=[world_trends[0]["trends"][z]["name"]
+                           for z in range(0, len(world_trends[0]["trends"]))]
+            for z in range(0,len(world_trends_list)):
+                try:
+                    print world_trends_list[z]
+                except UnicodeEncodeError:
+                    pass
 
-			print "\nUS trends:"
-			murica_trends = twitter.api.trends.place(_id=murica)
-			try:			#retrieve the top 5 trends
-			    murica_trends_list=[murica_trends[0]["trends"][z]["name"]
-					   for z in range(0, 5)]
-			except IndexError:	#if there are fewer than 5 trends, just take all the trends
-			    murica_trends_list=[murica_trends[0]["trends"][z]["name"]
-						for z in range(0, len(murica_trends[0]["trends"]))]
-			for z in range(0,len(murica_trends_list)):
-				try:
-					print murica_trends_list[z]
-				except UnicodeEncodeError:
-					pass
-			print
+            print "\nUS trends:"
+            murica_trends = twitter.api.trends.place(_id=murica)
+            try:            #retrieve the top 5 trends
+                murica_trends_list=[murica_trends[0]["trends"][z]["name"]
+                       for z in range(0, 5)]
+            except IndexError:  #if there are fewer than 5 trends, just take all the trends
+                murica_trends_list=[murica_trends[0]["trends"][z]["name"]
+                        for z in range(0, len(murica_trends[0]["trends"]))]
+            for z in range(0,len(murica_trends_list)):
+                try:
+                    print murica_trends_list[z]
+                except UnicodeEncodeError:
+                    pass
+            print
 
-	lastID=max
-	query = q
-	#get first 100 tweets
-	#twitter.api.search.tweets() returns a dictionary
-	listOfTweets = twitter.api.search.tweets(q = q,lang="en",count=100)["statuses"]
+    lastID=max
+    query = q
+    #get first 100 tweets
+    #twitter.api.search.tweets() returns a dictionary
+    listOfTweets = twitter.api.search.tweets(q = q,lang="en",count=100)["statuses"]
 
-	print "Okay... loading...\n"
+    print "Okay... loading...\n"
+    
+    numPos=0
+    numNeg=0
 
-	def utf8(txt):
-		return txt.encode(sys.stdout.encoding, errors='ignore')
+    tweetNumber = 0 #used for output
+    for tweet in listOfTweets:
+        tweetNumber += 1
+        place=utf8(tweet["user"]["location"])
+        person=utf8(tweet["user"]["screen_name"])
+        numRetweets=tweet["retweet_count"]
+        geocode=tweet["geo"]
+        time=tweet["created_at"].split(" +")[0]
+        text=utf8(tweet['text'])
 
-	
-	numPos=0
-	numNeg=0
+        print str(tweetNumber) + ") " + person + ": " + text
+        print "(Retweeted "+str(numRetweets)+" times)"
+        if place=="":
+            print "(Location unknown)."
+        else:
+            print "(Tweeted from "+place+")."
+        print "(Tweeted on "+time+")"
 
-	tweetNumber = 0	#used for output
-	for tweet in listOfTweets:
-		tweetNumber += 1
-		place=utf8(tweet["user"]["location"])
-		person=utf8(tweet["user"]["screen_name"])
-		numRetweets=tweet["retweet_count"]
-		geocode=tweet["geo"]
-		time=tweet["created_at"].split(" +")[0]
-		text=utf8(tweet['text'])
+        if classifier.classify(dict([(word, True) for word in tweet['text'].split()])) == 'neg':
+            print "(Detected a negative sentiment)"
+            numNeg=numNeg+1
+        if classifier.classify(dict([(word, True) for word in tweet['text'].split()])) == 'pos':
+            print "(Detected a positive sentiment)"
+            numPos=numPos+1
+        print
 
-		print str(tweetNumber) + ") " + person + ": " + text
-		print "(Retweeted "+str(numRetweets)+" times)"
-		if place=="":
-			print "(Location unknown)."
-		else:
-			print "(Tweeted from "+place+")."
-		print "(Tweeted on "+time+")"
-
-		if classifier.classify(dict([(word, True) for word in tweet['text'].split()])) == 'neg':
-			print "(Detected a negative sentiment)"
-			numNeg=numNeg+1
-		if classifier.classify(dict([(word, True) for word in tweet['text'].split()])) == 'pos':
-			print "(Detected a positive sentiment)"
-			numPos=numPos+1
-		print
-
-	print "In your search, found " + str(numPos) + " positive tweets, and " + str(numNeg) + " negative ones."
+    print "In your search, found " + str(numPos) + " positive tweets, and " + str(numNeg) + " negative ones."
 
 
-	#pretty table
-	status_texts = [tweet['text']
+    #pretty table
+    status_texts = [tweet['text']
                    for tweet in listOfTweets]
-	screen_names = [user_mention['screen_name']
+    screen_names = [user_mention['screen_name']
                    for tweet in listOfTweets 
                    for user_mention in tweet['entities']['user_mentions']]
-	hashtags = [hashtag['text'].lower()
+    hashtags = [hashtag['text'].lower()
                 for tweet in listOfTweets
                 for hashtag in tweet['entities']['hashtags']]
-	words = [w.lower()
+    words = [w.lower()
             for t in status_texts
             for w in t.split()
             if w.lower() not in stopWords
             if w.lower() not in stopWords2]
-
+    words = [w.lower()
+            for t in status_texts
+            for w in t.split()
+            if w.lower() not in stopWords
+            if w.lower() not in stopWords2]
    
-	#create tables displaying the most common words, users, and hashtags in our search
-	for label, data in (('Words',words),('Screen Name',screen_names),('Hashtags',hashtags)):
-		pt=PrettyTable(field_names=[label,'Count'])
-		c=Counter(data)
-		[pt.add_row(kv) for kv in c.most_common()[:15]]
-		pt.align[label],pt.align['Count']='l','r', #align first column to left and second to right
-		print pt
+    #create tables displaying the most common words, users, and hashtags in our search
+    for label, data in (('Most Common Words',words),('Most Common Users',screen_names),('Most Common Hashtags',hashtags)):
+        pt=PrettyTable(field_names=[label,'Count'])
+        c=Counter(data)
+        [pt.add_row(kv) for kv in c.most_common()[:15]]
+        pt.align[label],pt.align['Count']='l','r', #align first column to left and second to right
+        print pt
 
-	#table of most retweeted tweets
-	retweets=[(status['retweet_count'],
+    #table of most retweeted tweets
+    retweets=[(status['retweet_count'],
               status['retweeted_status']['user']['screen_name'],
               status['text'])
-		for status in listOfTweets
- 			if status.has_key('retweeted_status')]
+        for status in listOfTweets
+            if status.has_key('retweeted_status')]
 
-	pt=PrettyTable(field_names=['Retweet Count','Screen Name','Text'])
-	[pt.add_row(row) for row in sorted(retweets,reverse=True)[:5]]
-	pt.max_width['Text']=50
-	pt.align='l'
-	print pt
+    pt=PrettyTable(field_names=['Retweet Count','Screen Name','Text'])
+    [pt.add_row(row) for row in sorted(retweets,reverse=True)[:5]]
+    pt.max_width['Text']=50
+    pt.align='l'
+    print pt
 
-	#pie chart
-	if numPos+numNeg>0:
-		labels = "Positive", "Negative"
-		fracs = [numPos/(numPos+numNeg), numNeg/(numPos+numNeg)]
-		explode=(0.05, 0.05)
-		py.pie(fracs, explode=explode, labels=labels, shadow=True, autopct='%1.1f%%')
-		py.title('Positive vs. Negative \nSentiment Distribution of Tweets for '+q, bbox={'facecolor':'0.8', 'pad':5})
-		py.show()
-	else:
-		print "No tweets were found... Sorry!"
+    #pie chart
+        #Works inconsistently - will fix in future release
+    if numPos+numNeg>0:
+        labels = "Positive", "Negative"
+        fracs = [numPos, numNeg]
+        explode=(0.05, 0.05)
+        py.pie(fracs, explode=explode, labels=labels, shadow=True, autopct='%1.1f%%')
+        py.title('Positive vs. Negative \nSentiment Distribution of Tweets for '+q, bbox={'facecolor':'0.8', 'pad':5})
+        py.show()
+    else:
+        print "No tweets were found... Sorry!"
 
 
-	break
-	_ = raw_input("\nPress enter to search again.")
+    break
+    _ = raw_input("\nPress enter to search again.")
