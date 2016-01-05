@@ -16,8 +16,14 @@ sys.path.insert(0,"prettytable")
 from prettytable import PrettyTable
 
 #nltk stuff
+#Reasons for Naive Bayes:
+    #Faster to train than Maximum Entropy, more accurate than Decision Tree
+    #Naive assumption isn't too harmful because tweets are so small (fewer collocations)
+    #My experience with Maximum Entropy gave me poor results
 from nltk.corpus import stopwords
 from nltk.classify import NaiveBayesClassifier
+#from nltk.classify import MaxentClassifier
+#from nltk.classify import DecisionTreeClassifier
 from nltk.stem.porter import PorterStemmer
 import nltk
 
@@ -92,6 +98,8 @@ trainfeats=[negfeats,posfeats]
 print "Training the Naive Bayes Classifier..."
 
 classifier = NaiveBayesClassifier.train(trainfeats)
+#classifier = MaxentClassifier.train(trainfeats)   
+#classifier = DecisionTreeClassifier.train(trainfeats) 
 
 #TRAINING ENDS HERE
 
@@ -174,10 +182,11 @@ while True: #repeat forever!
 
         tweetFeatures = extractFeaturesFrom(tweet["text"])
         if tweetFeatures is not None:
-            if classifier.classify(tweetFeatures) == "neg":
+            polarity = classifier.classify(tweetFeatures)
+            if polarity == "neg":
                 print "(Detected a negative sentiment)"
                 numNeg=numNeg+1
-            elif classifier.classify(tweetFeatures) == "pos":
+            elif polarity == "pos":
                 print "(Detected a positive sentiment)"
                 numPos=numPos+1
         print
@@ -210,7 +219,7 @@ while True: #repeat forever!
         pt=PrettyTable(field_names=[label,'Count'])
         c=Counter(data)
         [pt.add_row(kv) for kv in c.most_common()[:15]]
-        pt.align[label],pt.align['Count']='l','r', #align first column to left and second to right
+        pt.align[label],pt.align['Count']='l','r', #align first column to left, second to right
         print pt
 
     #table of most retweeted tweets
@@ -233,7 +242,7 @@ while True: #repeat forever!
         fracs = [numPos, numNeg]
         explode=(0.05, 0.05)
         py.pie(fracs, explode=explode, labels=labels, shadow=True, autopct='%1.1f%%')
-        py.title('Positive vs. Negative \nSentiment Distribution of Tweets for '+q, bbox={'facecolor':'0.8', 'pad':5})
+        py.title('Positive vs. Negative \nSentiment Distribution of Tweets for ' + q, bbox={'facecolor':'0.8', 'pad':5})
         py.show()
     else:
         print "No tweets were found... Sorry!"
