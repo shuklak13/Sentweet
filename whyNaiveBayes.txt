@@ -1,0 +1,6 @@
+Faster to train than Maximum Entropy, more accurate than Decision Tree
+I believe that the Naive assumption isn't too harmful because tweets are so small (fewer collocations)
+	However, this may be wrong
+My experience with NLTK's Maximum Entropy and Decision Tree gave me poor results
+
+However, it is possible that Naive Bayes is not the way to go. I will continue to look into other classifiers.
