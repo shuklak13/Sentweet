@@ -1,4 +1,6 @@
-#SentweetSearch is a sentiment analysis application for Twitter data. It may classify tweets as positive or negative.
+##SentweetSearch
+
+SentweetSearch is a sentiment analysis application for Twitter data. It may classify tweets as positive or negative.
 
 Run the SentweetSearch.py file from the command line, as follows:
 

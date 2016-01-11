@@ -17,8 +17,8 @@ def normalize(word):
 #return tuple (features, label)
 #for input into NLTK's Naive Bayes Classifier
 def feature_tuple(fileName, mode, label):
-    features = word_features(fileName, mode)
-    return (features, label)
+   features = word_features(fileName, mode)
+   return (features, label)
 
 #add each word from the corpus into our dictionary
     #if it's not a stopword

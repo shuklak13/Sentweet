@@ -50,11 +50,11 @@ def createPieChart(numPos, numNeg, q):
         labels = "Positive", "Negative"
         fracs = [numPos, numNeg]
         explode=(0.05, 0.05)
-        listOfColors = ['b','g','r','c','m','y']
+        listOfColors = ['b','g','r','c','m']
         random.shuffle(listOfColors)    #random colors
         py.pie(fracs, explode=explode, labels=labels, shadow=True, autopct='%1.1f%%', colors=[listOfColors[0], listOfColors[1]])
         py.title('Positive vs. Negative \nSentiment Distribution of Tweets for ' + q, bbox={'facecolor':'0.8', 'pad':5})
+        print "Please close the pie chart window to continue\n"
         py.show()
-        print "Close pie chart to continue\n"
     else:
         print "No tweets were found... Sorry!"

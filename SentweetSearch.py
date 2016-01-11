@@ -1,10 +1,6 @@
 #To-do:
 #	trainClassifier.py
-#		Measure accuracy
-			# http://www.nltk.org/book/ch06.html
-			# http://ravikiranj.net/posts/2012/code/how-build-twitter-sentiment-analyzer/
-			# http://www.laurentluce.com/posts/twitter-sentiment-analysis-using-python-and-nltk/
-	#   Improve Sentiment Analysis
+	#   Improve Sentiment Analysis (currently positive-biased)
 	#		http://marcobonzanini.com/2015/05/17/mining-twitter-data-with-python-part-6-sentiment-analysis-basics/
 	#		movie sentiment analysis program
 	#		other classification algorithms
@@ -51,7 +47,3 @@ if __name__ == "__main__":
 
 	    visuals.createTables(listOfTweets)
 	    visuals.createPieChart(numPos, numNeg, query)
-
-	    continueCheck = raw_input("\nPress enter to search again, or type 'q' to quit.\n")
-	    if continueCheck=="q":
-	    	break

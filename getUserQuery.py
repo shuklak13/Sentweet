@@ -6,14 +6,16 @@ world=1
 murica=23424977
 
 def getUserQuery():
-    q="trends?"
-    while q=="trends?":
-        q=raw_input("What do you want to search on Twitter? (Type \"trends?\" for popular trends) \n")
+    query="trends?"
+    while query=="trends?":
+        query=raw_input("What do you want to search on Twitter?\n(Type \"trends?\" for popular trends, or \"QUIT\" to quit) \n")
         
-        #if the user requests to see trends
-        if q=="trends?":
-            print "Worldwide trends:"
+        if query=="QUIT":
+            quit()
+
+        if query=="trends?":
             world_trends = twitter.api.trends.place(_id=world)
+            print "Worldwide trends:"
             #retrieve top 5 trends
             try:
                 world_trends_list=[world_trends[0]["trends"][z]["name"]
@@ -28,12 +30,14 @@ def getUserQuery():
                 except UnicodeEncodeError:
                     pass
 
-            print "\nUS trends:"
             murica_trends = twitter.api.trends.place(_id=murica)
-            try:            #retrieve the top 5 trends
+            print "\nUS trends:"
+            #retrieve the top 5 trends
+            try:            
                 murica_trends_list=[murica_trends[0]["trends"][z]["name"]
                        for z in range(0, 5)]
-            except IndexError:  #if there are fewer than 5 trends, just take all the trends
+            #if there are fewer than 5 trends, just take all the trends
+            except IndexError:  
                 murica_trends_list=[murica_trends[0]["trends"][z]["name"]
                         for z in range(0, len(murica_trends[0]["trends"]))]
             for z in range(0,len(murica_trends_list)):
@@ -42,4 +46,4 @@ def getUserQuery():
                 except UnicodeEncodeError:
                     pass
             print
-    return q
+    return query

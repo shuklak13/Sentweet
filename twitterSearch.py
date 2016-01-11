@@ -31,7 +31,7 @@ def twitterSearch(query, classifier):
         else:
             print "(Tweeted from "+place+")."
         print "(Tweeted on "+time+")"
-
+        
         tweetFeatures = extractFeaturesFrom(tweet["text"])
         if tweetFeatures is not None:
             polarity = classifier.classify(tweetFeatures)
