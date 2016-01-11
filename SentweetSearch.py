@@ -1,5 +1,4 @@
 #To-do:
-#	Turn into a proper package
 #	trainClassifier.py
 #		Measure accuracy
 			# http://www.nltk.org/book/ch06.html
