@@ -1,4 +1,4 @@
-##SentweetSearch
+## SentweetSearch
 
 SentweetSearch is a sentiment analysis application for Twitter data. It may classify tweets as positive or negative.
 
